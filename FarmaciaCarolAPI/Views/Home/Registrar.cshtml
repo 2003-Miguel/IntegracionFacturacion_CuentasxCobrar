@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Registrar Factura";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Registrar Factura</h2>
+
+    <form id="facturaForm" class="card p-4 shadow-sm mb-4">
+        <div class="mb-3">
+            <label for="clienteId" class="form-label">Cliente</label>
+            <select class="form-select" id="clienteId" required>
+                <option value="">Seleccione un cliente</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="total" class="form-label">Total (RD$)</label>
+            <input type="number" step="0.01" class="form-control" id="total" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar</button>
+    </form>
+
+    <div id="facturasRegistradas" class="card p-4 shadow-sm">
+        <h4>Últimas Facturas Registradas</h4>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="tablaFacturas"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function cargarClientes() {
+        try {
+            const res = await fetch("/api/clientes");
+            const clientes = await res.json();
+            const select = document.getElementById("clienteId");
+            clientes.forEach(c => {
+                const option = document.createElement("option");
+                option.value = c.clienteID;
+                option.text = `${c.nombre} (ID: ${c.clienteID})`;
+                select.appendChild(option);
+            });
+
+            if (clientes.length > 0) {
+                select.value = clientes[0].clienteID;
+                mostrarFacturas(clientes[0].clienteID);
+            }
+        } catch (error) {
+            console.error("Error al cargar clientes:", error);
+        }
+    }
+
+    async function mostrarFacturas(clienteID) {
+        const tabla = document.getElementById("tablaFacturas");
+        if (!clienteID) {
+            tabla.innerHTML = "";
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/cuentasporcobrar/${clienteID}`);
+            const data = await res.json();
+
+            tabla.innerHTML = "";
+
+            if (!data.facturas || data.facturas.length === 0) {
+                tabla.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">Este cliente no tiene facturas registradas.</td>
+                        </tr>`;
+                return;
+            }
+
+            data.facturas.forEach(f => {
+                let fecha = new Date(f.fecha);
+
+                const fechaFormateada = fecha.toLocaleDateString('es-DO', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                function formatearHora12(hora24) {
+                    if (!hora24) return "";
+                    const [hora, minutos] = hora24.split(":");
+                    const h = parseInt(hora);
+                    const ampm = h >= 12 ? "PM" : "AM";
+                    const h12 = h % 12 || 12;
+                    return `${h12}:${minutos} ${ampm}`;
+                }
+
+                tabla.innerHTML += `
+                        <tr>
+                            <td>${f.facturaID || ""}</td>
+                            <td>${f.clienteID}</td>
+                            <td>${fechaFormateada}</td>
+                            <td>${formatearHora12(f.hora)}</td>
+                            <td>RD$ ${f.monto.toFixed(2)}</td>
+                            <td><span class="badge bg-${f.estado === 'Pendiente' ? 'warning' : 'success'}">${f.estado}</span></td>
+                        </tr>`;
+            });
+        } catch (error) {
+            console.error("Error al mostrar facturas:", error);
+            tabla.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Este cliente no tiene facturas registradas.</td></tr>`;
+        }
+    }
+
+    document.getElementById("clienteId").addEventListener("change", function () {
+        const clienteID = parseInt(this.value);
+        mostrarFacturas(clienteID);
+    });
+
+    document.getElementById("facturaForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const clienteID = parseInt(document.getElementById("clienteId").value);
+        const total = parseFloat(document.getElementById("total").value);
+
+        if (isNaN(clienteID) || isNaN(total)) {
+            alert("Complete correctamente el formulario.");
+            return;
+        }
+
+        const data = { clienteID, total };
+
+        try {
+            const res = await fetch("/api/facturas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert("Factura registrada correctamente");
+                this.reset();
+                mostrarFacturas(clienteID);
+            } else {
+                const error = await res.text();
+                alert("Error al registrar: " + error);
+            }
+        } catch (err) {
+            console.error("Error en la solicitud:", err);
+            alert("Hubo un error al registrar la factura.");
+        }
+    });
+
+    cargarClientes();
+</script>
