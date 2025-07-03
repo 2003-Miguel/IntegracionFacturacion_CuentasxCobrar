@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zIl7x+Du260=",
+  "dgSpecHash": "Lb7Hdzl4z7g=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Usuario\\Downloads\\Ejemplo\\FarmaciaCarolAPI\\FarmaciaCarolAPI\\FarmaciaCarolAPI.csproj",
+  "projectFilePath": "C:\\Users\\Usuario\\OneDrive\\Escritorio\\Repositorios de Git\\IntegracionFacturacion_CuentasxCobrar\\FarmaciaCarolAPI\\FarmaciaCarolAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Usuario\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Usuario\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
