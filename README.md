@@ -3,7 +3,7 @@
 ## 📌 Descripción del Proyecto
 Este proyecto implementa una solución de integración entre el módulo de **Facturación** y el módulo de **Cuentas por Cobrar** para la Farmacia Carol, usando **ASP.NET Core**, **Entity Framework Core** y **SQL Server**, aprovechando el uso de **Triggers** como tecnología propietaria para asegurar la consistencia entre ambas aplicaciones.
 
-## Autores
+## 👥 Autores
 
 Miguel Alejandro Vásquez Lara - A00109487
 
