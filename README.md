@@ -53,6 +53,6 @@ BEGIN
         Fecha,
         Hora,
         Total,
-        'Pendiente'
+        Estado
     FROM inserted;
 END
