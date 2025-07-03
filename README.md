@@ -29,12 +29,20 @@ Este proyecto implementa una solución de integración entre el módulo de **Fac
 ## 🔁 Disparador (Trigger) usado
 
 ```sql
-CREATE TRIGGER trg_Insert_CuentasPorCobrar
+CREATE TRIGGER trg_InsertarCxC_AfterFactura
 ON Facturas
 AFTER INSERT
 AS
 BEGIN
-    INSERT INTO CuentasPorCobrar (FacturaID, ClienteID, Monto, Estado)
-    SELECT i.FacturaID, i.ClienteID, i.Total, 'Pendiente'
-    FROM inserted i;
+    SET NOCOUNT ON;
+
+    INSERT INTO CuentasPorCobrar (ClienteID, FacturaID, Fecha, Hora, Monto, Estado)
+    SELECT
+        ClienteID,
+        FacturaID,
+        Fecha,
+        Hora,
+        Total,
+        'Pendiente'
+    FROM inserted;
 END
